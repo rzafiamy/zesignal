@@ -103,6 +103,7 @@ import * as ephemeralConfig from './ephemeral_config.main.ts';
 import * as mainProcessLogging from '../ts/logging/main_process_logging.main.ts';
 import { MainSQL } from '../ts/sql/main.main.ts';
 import { startMcpServer } from './mcp_server.main.ts';
+import { startZeChatLink } from './zechat_link.main.ts';
 import * as sqlChannels from './sql_channel.main.ts';
 import * as windowState from './window_state.std.ts';
 import type { CreateTemplateOptionsType } from './menu.std.ts';
@@ -2472,6 +2473,7 @@ app.on('ready', async () => {
   }
 
   startMcpServer({ sql, userDataPath });
+  startZeChatLink({ sql, getMainWindow });
 
   try {
     const IDB_KEY = 'indexeddb-delete-needed';

@@ -23,7 +23,7 @@ const DEFAULT_PORT = 7643;
 const MAX_BODY = 1024 * 1024;
 const MAX_LIMIT = 200;
 
-type Sql = Pick<MainSQL, 'sqlRead'>;
+export type Sql = Pick<MainSQL, 'sqlRead'>;
 type Json = Record<string, unknown>;
 
 type Tool = {
@@ -33,7 +33,7 @@ type Tool = {
   run: (sql: Sql, args: Json) => Promise<unknown>;
 };
 
-function conversationTitle(c: ConversationType): string {
+export function conversationTitle(c: ConversationType): string {
   const system = [c.systemGivenName, c.systemFamilyName].filter(Boolean);
   const profile = [c.profileName, c.profileFamilyName].filter(Boolean);
   return (
@@ -56,7 +56,7 @@ function summarizeConversation(c: ConversationType): Json {
   };
 }
 
-async function senderNames(sql: Sql): Promise<Map<string, string>> {
+export async function senderNames(sql: Sql): Promise<Map<string, string>> {
   const names = new Map<string, string>();
   for (const c of await sql.sqlRead('getAllConversations')) {
     if (c.serviceId) {
@@ -66,7 +66,10 @@ async function senderNames(sql: Sql): Promise<Map<string, string>> {
   return names;
 }
 
-function summarizeMessage(m: MessageType, names: Map<string, string>): Json {
+export function summarizeMessage(
+  m: MessageType,
+  names: Map<string, string>
+): Json {
   const outgoing = m.type === 'outgoing';
   const sender = m.sourceServiceId ? names.get(m.sourceServiceId) : undefined;
   return {
@@ -187,6 +190,27 @@ const TOOLS: Array<Tool> = [
     },
   },
 ];
+
+/** The read-only tools, for other agents' surfaces (the ZeChat panel). */
+export const READ_TOOLS: ReadonlyArray<
+  Readonly<{ name: string; description: string; inputSchema: Json }>
+> = TOOLS.map(({ name, description, inputSchema }) => ({
+  name,
+  description,
+  inputSchema,
+}));
+
+export async function runReadTool(
+  sql: Sql,
+  name: string,
+  args: Json
+): Promise<unknown> {
+  const tool = TOOLS.find(t => t.name === name);
+  if (!tool) {
+    throw new Error(`Unknown tool: ${name}`);
+  }
+  return tool.run(sql, args);
+}
 
 function rpcResult(id: unknown, result: unknown): Json {
   return { jsonrpc: '2.0', id, result };
