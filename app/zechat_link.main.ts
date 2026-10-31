@@ -13,11 +13,13 @@ import type { Socket } from 'node:net';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir, tmpdir, userInfo } from 'node:os';
-import { app, ipcMain, WebContentsView } from 'electron';
+import { fileURLToPath } from 'node:url';
+import { app, ipcMain, session, shell, WebContentsView } from 'electron';
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron';
 
 import { createLogger } from '../ts/logging/log.std.ts';
 import { getAppRootDir } from '../ts/util/appRootDir.main.ts';
+import { isPathInside } from '../ts/util/isPathInside.node.ts';
 import { drop } from '../ts/util/drop.std.ts';
 import {
   READ_TOOLS,
@@ -231,6 +233,24 @@ type PanelState = { sessions: Array<string>; hidden: Array<string> };
 
 function zechatRoot(): string {
   return process.env.ZECHAT_ROOT || join(homedir(), '.zechat');
+}
+
+// The panel's own session: Signal's default one only loads files from its own
+// folders and disables data: URLs (protocol_filter.node.ts). This one loads
+// the panel's files and nothing from the network, so what the agent renders
+// (a remote image in an answer) cannot carry a message off the machine.
+function panelSession(): Electron.Session {
+  const panelSess = session.fromPartition('persist:zechat-panel');
+  const root = panelDir();
+  panelSess.webRequest.onBeforeRequest((details, callback) => {
+    const { protocol } = new URL(details.url);
+    const allowed =
+      protocol === 'file:'
+        ? isPathInside(fileURLToPath(details.url), root)
+        : protocol === 'data:' || protocol === 'blob:';
+    callback({ cancel: !allowed });
+  });
+  return panelSess;
 }
 
 function panelDir(): string {
@@ -513,6 +533,7 @@ export function startZeChatLink({
       if (!view) {
         view = new WebContentsView({
           webPreferences: {
+            session: panelSession(),
             preload: join(panelDir(), 'preload.cjs'),
             contextIsolation: true,
             sandbox: true,
@@ -520,7 +541,12 @@ export function startZeChatLink({
           },
         });
         // Links in answers open in the browser, never in the panel.
-        view.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+        view.webContents.setWindowOpenHandler(({ url }) => {
+          if (/^https?:/i.test(url)) {
+            drop(shell.openExternal(url));
+          }
+          return { action: 'deny' };
+        });
         view.webContents.on('will-navigate', event => event.preventDefault());
         drop(view.webContents.loadFile(join(panelDir(), 'panel.html')));
         win.on('resize', layout);
