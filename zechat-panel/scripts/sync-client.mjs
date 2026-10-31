@@ -37,6 +37,19 @@ writeFileSync(
   readFileSync(mainPath, "utf8").replace('from "../package.json"', 'from "../../package.json"')
 );
 
+// Tailwind skips gitignored files when it looks for classes, and the copy is
+// gitignored: name it explicitly, or the client's utilities vanish from the CSS.
+const stylesPath = join(root, "src/client/styles.css");
+const styles = readFileSync(stylesPath, "utf8");
+if (!/@import\s+["']tailwindcss["'][^;]*;/.test(styles)) {
+  console.error("src/client/styles.css no longer imports tailwindcss: update scripts/sync-client.mjs");
+  process.exit(1);
+}
+writeFileSync(
+  stylesPath,
+  styles.replace(/@import\s+["']tailwindcss["'][^;]*;/, (line) => `${line}\n@source "./";\n@source "../../panel.html";`)
+);
+
 for (const dir of ["icons"]) {
   if (existsSync(join(client, "public", dir))) {
     rmSync(join(root, "public", dir), { recursive: true, force: true });
