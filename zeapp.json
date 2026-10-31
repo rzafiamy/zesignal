@@ -1,0 +1,8 @@
+{
+  "name": "zesignal",
+  "title": "ZeSignal",
+  "id": "zesignal",
+  "bin": "zesignal",
+  "icon": "build/icons/png/128x128.png",
+  "install": "utility/install.sh"
+}
