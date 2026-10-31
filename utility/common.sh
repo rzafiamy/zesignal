@@ -60,6 +60,17 @@ setup_toolchain() {
   fi
 }
 
+# The docked ZeChat panel (zechat-panel/): its own npm package, built to dist/.
+build_panel() {
+  say "Building the ZeChat panel"
+  if [[ ! -d zechat-panel/node_modules ]] || [[ zechat-panel/package-lock.json -nt zechat-panel/node_modules/.package-lock.json ]]; then
+    (cd zechat-panel && n exec "$NODE_VERSION" npm ci --no-audit --no-fund)
+  fi
+  # zechat-client is proprietary and not in this repository: copied in here.
+  (cd zechat-panel && n exec "$NODE_VERSION" node scripts/sync-client.mjs)
+  (cd zechat-panel && n exec "$NODE_VERSION" npm run build --silent)
+}
+
 # PATH is extended inside n's environment so its Node stays first.
 in_node() { n exec "$NODE_VERSION" bash -c "export PATH=\"$TOOLS/pnpm/bin:\$PATH\"; $*"; }
 

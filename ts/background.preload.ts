@@ -3,7 +3,7 @@
 
 import lodash from 'lodash';
 import { createRoot } from 'react-dom/client';
-import { mountZeChatPanel } from './zechat/ZeChatPanel.preload.tsx';
+import { mountZeChatHost } from './zechat/ZeChatHost.preload.ts';
 import PQueue from 'p-queue';
 import pMap from 'p-map';
 import { v7 as generateUuid } from 'uuid';
@@ -1606,7 +1606,7 @@ async function startApp(): Promise<void> {
     const appContainer = document.getElementById('app-container');
     strictAssert(appContainer != null, 'No #app-container');
     createRoot(appContainer).render(createAppRoot(window.reduxStore));
-    mountZeChatPanel();
+    mountZeChatHost();
     const hideMenuBar = itemStorage.get('hide-menu-bar', false);
     window.IPC.setAutoHideMenuBar(hideMenuBar);
     window.IPC.setMenuBarVisibility(!hideMenuBar);

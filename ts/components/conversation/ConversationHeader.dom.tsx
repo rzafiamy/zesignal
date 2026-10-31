@@ -404,6 +404,16 @@ export const ConversationHeader = memo(function ConversationHeader({
                 label={i18n('icu:search')}
                 variant="implied-secondary"
               />
+              {/* zesignal: the docked ZeChat panel (ts/zechat/) */}
+              <AxoIconButton.Root
+                symbol="message-thread"
+                size="md"
+                onClick={() =>
+                  window.dispatchEvent(new Event('zesignal:toggle-zechat'))
+                }
+                label="ZeChat"
+                variant="implied-secondary"
+              />
 
               <AxoDropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
                 <AxoDropdownMenu.Trigger disabled={isSelectMode}>

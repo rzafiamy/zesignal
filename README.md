@@ -18,32 +18,42 @@ Licensed AGPL-3.0, like upstream. This is not an official Signal build and is no
 
 ## What the fork adds
 
-| File                                | What it does                                               |
-| ----------------------------------- | ---------------------------------------------------------- |
-| `app/mcp_server.main.ts`            | MCP server (Streamable HTTP) in the main process           |
-| `app/zechat_link.main.ts`           | ZeChat panel engine: zelink client and Signal environment  |
-| `ts/zechat/ZeChatPanel.preload.tsx` | the side panel (React)                                     |
-| `app/main.main.ts`                  | starts both once the database is open (4 lines)            |
-| `ts/background.preload.ts`          | mounts the panel (2 lines)                                 |
-| `utility/run.sh`                    | build and run from source                                  |
-| `utility/install.sh`                | package and install into `~/.local` (Zenie finds it there) |
-| `utility/sync.sh`                   | rebase onto upstream, push, reinstall                      |
-| `zeapp.json`                        | Zenie manifest                                             |
-| `README.md`                         | this section, above upstream's README                      |
+| File                                                    | What it does                                                           |
+| ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `app/mcp_server.main.ts`                                | MCP server (Streamable HTTP) in the main process                       |
+| `zechat-panel/`                                         | the docked ZeChat panel: the ZeChat web client with a Signal plugin    |
+| `app/zechat_link.main.ts`                               | hosts the panel beside Signal; its link to ZeChat and to Signal's data |
+| `ts/zechat/ZeChatHost.preload.ts`                       | Signal's side: makes room, follows the open chat, inserts drafts       |
+| `app/main.main.ts`                                      | starts the MCP server and the panel host (4 lines)                     |
+| `ts/background.preload.ts`                              | mounts Signal's side (2 lines)                                         |
+| `ts/components/conversation/ConversationHeader.dom.tsx` | the ZeChat button (10 lines)                                           |
+| `utility/run.sh`                                        | build and run from source                                              |
+| `utility/install.sh`                                    | package and install into `~/.local` (Zenie finds it there)             |
+| `utility/sync.sh`                                       | rebase onto upstream, push, reinstall                                  |
+| `zeapp.json`                                            | Zenie manifest                                                         |
+| `README.md`                                             | this section, above upstream's README                                  |
 
-### ZeChat side panel
+### ZeChat panel
 
-Open it with **Ctrl+Alt+Z** or the **ZeChat** tab on the right edge. Ask about the open
-conversation: summarise it, find something, draft a reply.
+The **ZeChat** button in the conversation header (or **Ctrl+Alt+Z**) docks ZeChat on the right of
+the window; the conversation narrows to make room.
 
-- The agent runs in ZeChat (models, memory, approvals, history) over
-  [zelink](https://gitlab.aterinieto.com/dev-365-apps/zelink): `$XDG_RUNTIME_DIR/zechat/link.sock`.
-  ZeChat must be running (its window or `zechat serve`).
-- It sees the open conversation and its last 20 messages, and can list, read and search
-  conversations, and open one.
-- It never sends: `draft_reply` shows a draft in the panel, **Insert** puts it in the composer,
-  and you press Send. Approvals ZeChat asks for appear in the panel.
-- Conversations from the panel land in ZeChat's history, under `zesignal@link`.
+- It is the ZeChat web client itself: same look, same renderer for markdown, code, formulas and
+  diagrams, approvals, Stop, the panel's own past chats.
+- Signal is a plugin of it (`zechat-panel/src/signal/`): a card over the composer shows the open
+  conversation; with the **Chat** chip on, its last 20 messages go in front of your message. The
+  agent can list, read and search your conversations and open one.
+- It never sends. `draft_reply` shows a draft card; **Insert** puts it in Signal's composer, and
+  you press Send there.
+- It reaches ZeChat over its **local link** (`$XDG_RUNTIME_DIR/zechat/link.sock`), not a hub:
+  nothing leaves the machine. ZeChat must be running (its window or `zechat serve`). What the
+  link does not serve is absent here: Tasks, attachments, the full history (ZeChat's own window
+  has the panel's chats too, under `zesignal@link`).
+- **The client is proprietary and is not in this repository.** The AGPL code here is the Signal
+  plugin, the local-link bridge and the build glue. `utility/run.sh` and `utility/install.sh` copy
+  the client in from `../zechat-client` relative to the parent of this checkout's folder (or
+  `ZECHAT_CLIENT_REPO`) on every build, so building the panel requires access to it. The copy
+  (`zechat-panel/src/client/`, `panel.html`, `public/icons/`) is gitignored; never commit it.
 
 ### MCP server
 
@@ -103,7 +113,8 @@ git push --force-with-lease origin zesignal && utility/install.sh
 ```
 
 or `git rebase --abort` to go back. Conflicts are rare: apart from new files, the fork touches only
-a few lines of `app/main.main.ts` and `ts/background.preload.ts`, and the top of this README.
+a few lines of `app/main.main.ts`, `ts/background.preload.ts` and the conversation header, and
+the top of this README.
 
 ### Doing it by hand
 

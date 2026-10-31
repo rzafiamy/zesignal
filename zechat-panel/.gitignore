@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# zechat-client is proprietary: copied in at build time, never committed.
+src/client/
+panel.html
+public/icons/

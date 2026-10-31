@@ -1,0 +1,24 @@
+{
+  "name": "zesignal-zechat-panel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The ZeChat client docked in zesignal, over ZeChat's local link.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch --mode development",
+    "update:client": "node scripts/sync-client.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "vite": "^6.3.0"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.12",
+    "highlight.js": "^11.12.0",
+    "katex": "^0.18.9",
+    "marked": "^18.0.6",
+    "mermaid": "^12.0.0"
+  }
+}

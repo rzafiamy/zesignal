@@ -1,0 +1,26 @@
+/* What the panel adds to the client's look: the conversation card over the
+   composer, its chip and the drafts. Same tokens as the client
+   (src/client/styles.css), so light, dark and system follow by themselves —
+   shaped like zechat-chrome's page card. */
+
+.sigcard { display: flex; align-items: center; gap: 9px; padding: 2px 2px 8px; border-bottom: 1px solid var(--line); }
+.sigcard.is-empty { border-bottom-style: dashed; }
+.sigcard__avatar { width: 22px; height: 22px; border-radius: var(--r-full); flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 800; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+.sigcard.is-empty .sigcard__avatar { color: var(--muted); background: var(--subtle); }
+.sigcard__text { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.35; }
+.sigcard__title { font-size: 12px; font-weight: 600; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sigcard__sub { font-size: 10.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sigchips { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 7px; }
+.sigchip { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 4px 8px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: background .12s, border-color .12s, color .12s; }
+.sigchip:hover:not(:disabled) { background: var(--subtle); color: var(--fg); }
+.sigchip:disabled { opacity: .5; cursor: default; }
+.sigchip.on { border-color: color-mix(in srgb, var(--accent) 25%, var(--line)); color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--surface)); }
+
+.sigdrafts:empty { display: none; }
+.sigdrafts { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 40vh; overflow-y: auto; }
+.sigdraft { padding: 9px 10px; border-radius: var(--r-s); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.sigdraft__head { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .02em; }
+.sigdraft__text { margin-top: 5px; font-size: 13px; color: var(--fg); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; }
+.sigdraft__row { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
+.sigdraft__row .btn { display: inline-flex; align-items: center; gap: 4px; }

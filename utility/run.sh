@@ -19,6 +19,7 @@ setup_toolchain
 if (( BUILD )); then
   say "Building"
   in_node 'pnpm run generate'
+  build_panel
 fi
 setup_sandbox
 

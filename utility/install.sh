@@ -25,6 +25,8 @@ local_config=config/local-production.json
 [[ -f "$local_config" ]] || die "$local_config missing after generate"
 sed -i "s/}\s*$/,$CONFIG_OVERRIDES}/" "$local_config"
 
+build_panel
+
 say "Packaging (unpacked Linux directory)"
 rm -rf release/linux-unpacked
 in_node 'SIGNAL_ENV=production pnpm run build:electron --linux dir --config.directories.output=release'
@@ -33,6 +35,8 @@ in_node 'SIGNAL_ENV=production pnpm run build:electron --linux dir --config.dire
 say "Installing to $INSTALL_DIR"
 rm -rf "$INSTALL_DIR.new"
 cp -a release/linux-unpacked "$INSTALL_DIR.new"
+# The panel sits beside app.asar; app/zechat_link.main.ts loads it from there.
+cp -a zechat-panel/dist "$INSTALL_DIR.new/resources/zechat-panel"
 rm -rf "$INSTALL_DIR"
 mv "$INSTALL_DIR.new" "$INSTALL_DIR"
 
